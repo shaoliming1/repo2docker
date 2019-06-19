@@ -10,22 +10,8 @@ import sys
 import xml.etree.ElementTree as ET
 
 from traitlets import Dict
-
 TEMPLATE = r"""
-FROM buildpack-deps:bionic
-
-# avoid prompts from apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Set up locales properly
-RUN apt-get -qq update && \
-    apt-get -qq install --yes --no-install-recommends locales > /dev/null && \
-    apt-get -qq purge && \
-    apt-get -qq clean && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    locale-gen
+FROM 172.16.185.27:30002/jupyter/baserepo2docker
 
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
@@ -45,13 +31,9 @@ RUN adduser --disabled-password \
     --uid ${NB_UID} \
     ${NB_USER}
 
-RUN wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key |  apt-key add - && \
-    DISTRO="bionic" && \
-    echo "deb https://deb.nodesource.com/node_10.x $DISTRO main" >> /etc/apt/sources.list.d/nodesource.list && \
-    echo "deb-src https://deb.nodesource.com/node_10.x $DISTRO main" >> /etc/apt/sources.list.d/nodesource.list
-
 # Base package installs are not super interesting to users, so hide their outputs
 # If install fails for some reason, errors will still be printed
+{% if base_packages -%}
 RUN apt-get -qq update && \
     apt-get -qq install --yes --no-install-recommends \
        {% for package in base_packages -%}
@@ -61,6 +43,7 @@ RUN apt-get -qq update && \
     apt-get -qq purge && \
     apt-get -qq clean && \
     rm -rf /var/lib/apt/lists/*
+{% endif -%}
 
 {% if packages -%}
 RUN apt-get -qq update && \
@@ -160,6 +143,10 @@ RUN chown -R ${NB_USER}:${NB_USER} ${REPO_DIR}
 LABEL {{k}}="{{v}}"
 {%- endfor %}
 
+# RUN cp ${REPO_DIR}/.nb/zmqhandlers.py  /srv/conda/lib/python3.7/site-packages/notebook/base/zmqhandlers.py && \
+#     cp ${REPO_DIR}/.nb/handlers.py /srv/conda/lib/python3.7/site-packages/notebook/services/kernels/handlers.py && \
+#     rm -fr ${REPO_DIR}/.nb
+
 # We always want containers to run as non-root
 USER ${NB_USER}
 
@@ -241,11 +228,12 @@ class BuildPack:
 
         These would be installed with a --no-install-recommends option.
         """
+        # nodejs less unzip is default
         return {
             # Utils!
-            "less",
-            "nodejs",
-            "unzip",
+            # "less",
+            # "nodejs",
+            # "unzip",
         }
 
     def get_build_env(self):

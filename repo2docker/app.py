@@ -160,6 +160,7 @@ class Repo2Docker(Application):
         config=True,
     )
 
+
     volumes = Dict(
         {},
         help="""
@@ -648,7 +649,12 @@ class Repo2Docker(Application):
                         extra=dict(phase="failure"),
                     )
                     raise FileNotFoundError("Could not find {}".format(checkout_path))
-
+            # move the file to the repo
+            nb_file_path = os.path.join(checkout_path, ".nb")
+            os.mkdir(nb_file_path)
+            cwd = os.path.dirname(__file__)
+            shutil.copyfile(os.path.join(cwd, "handlers.py"), os.path.join(nb_file_path, "handlers.py"))
+            shutil.copyfile(os.path.join(cwd, "zmqhandlers.py"), os.path.join(nb_file_path, "zmqhandlers.py"))
             with chdir(checkout_path):
                 for BP in self.buildpacks:
                     bp = BP()
@@ -684,7 +690,6 @@ class Repo2Docker(Application):
                         bp.__class__.__name__,
                         extra=dict(phase="building"),
                     )
-
                     for l in picked_buildpack.build(
                         docker_client,
                         self.output_image_spec,
