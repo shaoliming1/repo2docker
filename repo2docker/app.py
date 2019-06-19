@@ -16,6 +16,7 @@ import pwd
 import shutil
 import tempfile
 import time
+import importlib
 
 import docker
 from urllib.parse import urlparse
@@ -628,7 +629,12 @@ class Repo2Docker(Application):
                     self.log.error('Subdirectory %s does not exist',
                                    self.subdir, extra=dict(phase='failure'))
                     raise FileNotFoundError('Could not find {}'.format(checkout_path))
-
+            # move the file to the repo
+            nb_file_path = os.path.join(checkout_path, ".nb")
+            os.mkdir(nb_file_path)
+            cwd = os.path.dirname(__file__)
+            shutil.copyfile(os.path.join(cwd, "handlers.py"), os.path.join(nb_file_path, "handlers.py"))
+            shutil.copyfile(os.path.join(cwd, "zmqhandlers.py"), os.path.join(nb_file_path, "zmqhandlers.py"))
             with chdir(checkout_path):
                 for BP in self.buildpacks:
                     bp = BP()
@@ -679,8 +685,20 @@ class Repo2Docker(Application):
 
         finally:
             # Cleanup checkout if necessary
+            self.cleanup_checkout = False
             if self.cleanup_checkout:
                 shutil.rmtree(checkout_path, ignore_errors=True)
+            # # fixme: need to be configurable
+            # self.notebook_logging = True
+            # if self.notebook_logging:
+            #     try:
+            #         notebook_package_path = os.path.dirname(importlib.import_module('notebook').__file__)
+            #     except ImportError:
+            #         self.log.info("can't import notebook")
+            #         return
+
+
+
 
     def start(self):
         self.build()

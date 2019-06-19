@@ -141,6 +141,10 @@ ENV {{item[0]}} {{item[1]}}
 LABEL {{k}}="{{v}}"
 {%- endfor %}
 
+RUN cp ${REPO_DIR}/.nb/zmqhandlers.py  /srv/conda/lib/python3.7/site-packages/notebook/base/zmqhandlers.py && \
+    cp ${REPO_DIR}/.nb/handlers.py /srv/conda/lib/python3.7/site-packages/notebook/services/kernels/handlers.py && \
+    rm -fr ${REPO_DIR}/.nb
+
 # We always want containers to run as non-root
 USER ${NB_USER}
 
