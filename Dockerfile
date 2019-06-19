@@ -21,7 +21,9 @@ RUN pip3 install --no-cache-dir /tmp/wheelhouse/*.whl
 
 # add git-credential helper
 COPY ./docker/git-credential-env /usr/local/bin/git-credential-env
-RUN git config --system credential.helper env
+RUN git config --system credential.helper env &&\
+openssl s_client -showcerts -connect gitlab.bnu.edu.cn:443 2>/dev/null  | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'  >> /etc/ssl/certs/ca-certificates.crt
+
 
 # Used for testing purpose in ports.py
 EXPOSE 52000
