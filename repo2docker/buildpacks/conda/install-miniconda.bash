@@ -36,7 +36,7 @@ mv /tmp/.condarc /srv/conda/.condarc
 
 # Do not attempt to auto update conda or dependencies
 conda config --system --set auto_update_conda false
-conda config --system --set show_channel_urls true
+# conda config --system --set show_channel_urls true
 
 # install conda itself
 if [[ "${CONDA_VERSION}" != "${MINICONDA_VERSION}" ]]; then
