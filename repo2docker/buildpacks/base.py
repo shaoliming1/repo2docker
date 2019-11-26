@@ -10,36 +10,8 @@ import sys
 import xml.etree.ElementTree as ET
 
 from traitlets import Dict
-
 TEMPLATE = r"""
-FROM buildpack-deps:bionic
-
-# avoid prompts from apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# modify /etc/apt/source.list
-RUN echo "deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse" > /etc/apt/sources.list && \
-    echo "deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
-    echo "deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
-    echo "deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse" >> /etc/apt/sources.list
-
-
-# Set up locales properly
-RUN apt-get -qq update && \
-    apt-get -qq install --yes --no-install-recommends locales > /dev/null && \
-    apt-get -qq purge && \
-    apt-get -qq clean && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    locale-gen
-
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
-
-# Use bash as default shell, rather than sh
-ENV SHELL /bin/bash
+FROM 172.16.185.27:30002/jupyter/baserepo2docker
 
 # Set up user
 ARG NB_USER
@@ -51,12 +23,6 @@ RUN adduser --disabled-password \
     --gecos "Default user" \
     --uid ${NB_UID} \
     ${NB_USER}
-
-# relace nodesource with tsinghua mirror
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    DISTRO="bionic" && \
-    echo "deb https://mirrors.tuna.tsinghua.edu.cn/nodesource/deb_10.x $DISTRO main" >> /etc/apt/sources.list.d/nodesource.list && \
-    echo "deb-src https://mirrors.tuna.tsinghua.edu.cn/nodesource/deb_10.x $DISTRO main" >> /etc/apt/sources.list.d/nodesource.list
 
 # Base package installs are not super interesting to users, so hide their outputs
 # If install fails for some reason, errors will still be printed
@@ -178,6 +144,7 @@ CMD ["jupyter", "notebook", "--ip", "0.0.0.0"]
 {{ appendix }}
 {% endif %}
 """
+
 
 
 class BuildPack:

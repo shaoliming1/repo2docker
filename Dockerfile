@@ -18,7 +18,9 @@ RUN apt-get update \
 
 # install repo2docker
 COPY --from=0 /tmp/wheelhouse /tmp/wheelhouse
-RUN pip3 install --no-cache-dir /tmp/wheelhouse/*.whl
+RUN pip3 install pip -U && \
+    pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+    pip3 install --no-cache-dir /tmp/wheelhouse/*.whl
 
 # add git-credential helper
 COPY ./docker/git-credential-env /usr/local/bin/git-credential-env
