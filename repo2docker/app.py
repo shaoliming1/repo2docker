@@ -654,6 +654,7 @@ class Repo2Docker(Application):
                     bp = BP()
                     if bp.detect():
                         picked_buildpack = bp
+                        self.log.info("Shao Liming")
                         break
                 else:
                     picked_buildpack = self.default_buildpack()

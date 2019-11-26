@@ -9,14 +9,14 @@ CONDA_VERSION=4.7.10
 # Can be obtained from https://repo.continuum.io/miniconda/
 MD5SUM="718259965f234088d785cad1fbd7de03"
 
-URL="https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh"
+URL="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh"
 INSTALLER_PATH=/tmp/miniconda-installer.sh
 
 # make sure we don't do anything funky with user's $HOME
 # since this is run as root
 unset HOME
 
-wget --quiet $URL -O ${INSTALLER_PATH}
+curl -Lo ${INSTALLER_PATH} ${URL}
 chmod +x ${INSTALLER_PATH}
 
 # check md5 checksum
@@ -28,15 +28,15 @@ fi
 bash ${INSTALLER_PATH} -b -p ${CONDA_DIR}
 export PATH="${CONDA_DIR}/bin:$PATH"
 
-# Allow easy direct installs from conda forge
-conda config --system --add channels conda-forge
+# add .condarc to  `/srv/condda`
+mv /tmp/.condarc /srv/conda/.condarc
+
+# 我们在.condarc中已经加入，这里注释掉
+# conda config --system --add channels conda-forge
 
 # Do not attempt to auto update conda or dependencies
 conda config --system --set auto_update_conda false
 conda config --system --set show_channel_urls true
-
-# bug in conda 4.3.>15 prevents --set update_dependencies
-echo 'update_dependencies: false' >> ${CONDA_DIR}/.condarc
 
 # install conda itself
 if [[ "${CONDA_VERSION}" != "${MINICONDA_VERSION}" ]]; then
