@@ -97,6 +97,9 @@ class CondaBuildPack(BaseImage):
         """
         files = {
             'conda/install-miniconda.bash': '/tmp/install-miniconda.bash',
+            # FIXME: 把conda的配置文件放在这里似乎有点奇怪
+            #  不过看开发者有把environment.yml写在这里，可以暂时这么干
+            'conda/custom_condarc': '/tmp/.condarc'
         }
         py_version = self.python_version
         self.log.info("Building conda environment for python=%s" % py_version)

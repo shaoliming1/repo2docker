@@ -5,7 +5,8 @@ set -ex
 cd $(dirname $0)
 MINICONDA_VERSION=4.5.11
 CONDA_VERSION=4.5.11
-URL="https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh"
+# URL="https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh"
+URL="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh"
 INSTALLER_PATH=/tmp/miniconda-installer.sh
 
 wget --quiet $URL -O ${INSTALLER_PATH}
@@ -23,15 +24,18 @@ fi
 bash ${INSTALLER_PATH} -b -p ${CONDA_DIR}
 export PATH="${CONDA_DIR}/bin:$PATH"
 
-# Allow easy direct installs from conda forge
-conda config --system --add channels conda-forge
+# add .condarc to  `/srv/condda`
+mv /tmp/.condarc /srv/conda/.condarc
+
+# 我们在.condarc中已经加入，这里注释掉
+# conda config --system --add channels conda-forge
 
 # Do not attempt to auto update conda or dependencies
 conda config --system --set auto_update_conda false
-conda config --system --set show_channel_urls true
+# conda config --system --set show_channel_urls true
 
 # install conda itself
-conda install -yq conda==${CONDA_VERSION}
+conda install -y conda==${CONDA_VERSION}
 
 # switch Python in its own step
 # since switching Python during an env update can
@@ -45,6 +49,11 @@ echo 'update_dependencies: false' >> ${CONDA_DIR}/.condarc
 
 echo "installing root env:"
 cat /tmp/environment.yml
+
+echo "config pip to use tuna mirror"
+pip install pip -U
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
 conda env update -n root -f /tmp/environment.yml
 
 # enable nteract-on-jupyter, which was installed with pip
