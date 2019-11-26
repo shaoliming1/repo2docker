@@ -5,6 +5,8 @@ FROM python:${PYTHON_VERSION}
 ADD . /tmp/src
 RUN mkdir /tmp/wheelhouse \
  && cd /tmp/wheelhouse \
+ && pip3 install pip -U \
+ && pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple \
  && pip3 wheel --no-cache-dir /tmp/src
 
 # run with slim variant instead of full
@@ -18,14 +20,14 @@ RUN apt-get update \
 
 # install repo2docker
 COPY --from=0 /tmp/wheelhouse /tmp/wheelhouse
-RUN pip3 install pip -U && \
-    pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
-    pip3 install --no-cache-dir /tmp/wheelhouse/*.whl
+RUN pip3 install --no-cache-dir /tmp/wheelhouse/*.whl
 
 # add git-credential helper
 COPY ./docker/git-credential-env /usr/local/bin/git-credential-env
-RUN git config --system credential.helper env &&\
-openssl s_client -showcerts -connect gitlab.bnu.edu.cn:443 2>/dev/null  | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'  >> /etc/ssl/certs/ca-certificates.crt
+COPY GeoTrust_RSA_CA_2018.crt /usr/local/share/ca-certificates/GeoTrust_RSA_CA_2018.crt
+RUN git config --system credential.helper env && \
+    update-ca-certificates && \
+    openssl s_client -showcerts -connect gitlab.bnu.edu.cn:443 2>/dev/null  | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'  >> /etc/ssl/certs/ca-certificates.crt
 
 
 # Used for testing purpose in ports.py
