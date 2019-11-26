@@ -9,7 +9,7 @@ CONDA_VERSION=4.5.11
 URL="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh"
 INSTALLER_PATH=/tmp/miniconda-installer.sh
 
-wget --quiet $URL -O ${INSTALLER_PATH}
+curl -Lo ${INSTALLER_PATH} ${URL}
 chmod +x ${INSTALLER_PATH}
 
 # Only MD5 checksums are available for miniconda
