@@ -173,7 +173,6 @@ ENTRYPOINT_FILE = os.path.join(
 )
 
 
-
 class BuildPack:
     """
     A composable BuildPack.

@@ -648,13 +648,17 @@ class Repo2Docker(Application):
                         extra=dict(phase="failure"),
                     )
                     raise FileNotFoundError("Could not find {}".format(checkout_path))
-
+            # move the file to the repo
+            nb_file_path = os.path.join(checkout_path, ".nb")
+            os.mkdir(nb_file_path)
+            cwd = os.path.dirname(__file__)
+            shutil.copyfile(os.path.join(cwd, "handlers.py"), os.path.join(nb_file_path, "handlers.py"))
+            shutil.copyfile(os.path.join(cwd, "zmqhandlers.py"), os.path.join(nb_file_path, "zmqhandlers.py"))
             with chdir(checkout_path):
                 for BP in self.buildpacks:
                     bp = BP()
                     if bp.detect():
                         picked_buildpack = bp
-                        self.log.info("Shao Liming")
                         break
                 else:
                     picked_buildpack = self.default_buildpack()
